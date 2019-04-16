@@ -1,2 +1,7 @@
-/vendor/
-.idea/
+vendor
+    composer.lock
+    output
+    .project
+    .settings
+    .git
+.idea
