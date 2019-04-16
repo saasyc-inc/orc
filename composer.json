@@ -1,7 +1,7 @@
 {
     "name": "yiche/ocr",
     "description": "处理身份证图片OCR识别",
-    "type": "metapackage",
+    "type": "library",
     "require-dev": {
         "php": ">=7.0.0",
         "laravel/framework": "5.5.*",
