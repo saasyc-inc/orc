@@ -1,7 +1,7 @@
 CREATE TABLE `ocr_idcard` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `app_id` varchar(100) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '应用id',
-  `app_key` varchar(100) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '应用key',
+  `api_key` varchar(100) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '应用key',
   `secret_key` varchar(100) NOT NULL DEFAULT '' COMMENT '秘钥',
   `fileUrl` longtext CHARACTER SET utf8 NOT NULL COMMENT '图片base64编码',
   `status` tinyint(3) NOT NULL DEFAULT '1' COMMENT '状态标识：1 成功 2 失败',
@@ -23,5 +23,4 @@ CREATE TABLE `ocr_idcard` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '文件修改时间',
   `deleted_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '删除时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='OCR百度身份证识别(eker)';
-
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COMMENT='OCR百度身份证识别(eker)';

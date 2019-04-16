@@ -22,19 +22,86 @@ class OcrController extends Controller
     }
 
 
-    public function idcard()
+    /**
+     * 身份证识别
+     * @param Request $request
+     * @return mixed
+     * @throws \Exception
+     */
+    public function idcard(Request $request)
     {
-        $param = [
-            //正面
-            'fileUrl'=>"https://yiche-static.oss-cn-hangzhou.aliyuncs.com/anjie/uploads/image/20190416/79b2ab6ef10cd0ac154ab21bdeac8a47.jpg",
-            //反面
-            //"fileUrl"=>"https://yiche-static.oss-cn-hangzhou.aliyuncs.com/anjie/uploads/image/20190416/93ca6a2a8cbb0119a4fab9e2a8108c2f.jpg",
-            "type"=>1,
-            "from_ip"=>"127.0.0.1"
-        ];
+        $front = $request->input("front", "");
+        $back = $request->input("back", "");
+        $discern_back = $request->input('discern_back', 0);
         $ocrService = new OcrService();
-        $result = $ocrService->idcard($param);
-        dd($result);
+
+        if ($discern_back == 1) {//两张都识别
+            if (empty($front) || empty($back)) {
+                return UtilTool::output(505, null, "缺少身份证正面和反面文件地址URL");
+            } else {
+                //正面
+                $frontData = $ocrService->idcard(['fileUrl' => $front, "type" => 1]);
+                //反面
+                $backData = $ocrService->idcard(['fileUrl' => $back, "type" => 2]);
+
+                $result = $this->formatData($frontData, $backData, 1);
+            }
+        } elseif ($discern_back == 2) {//只识别背面
+            if (empty($back)) {
+                return UtilTool::output(505, null, "缺少身份证反面文件地址URL");
+            } else {
+                $param = [
+                    //反面
+                    'fileUrl' => $back,
+                    "type" => 2,
+                ];
+                $backData = $ocrService->idcard($param);
+                $result = $this->formatData([], $backData, 2);
+            }
+        } else {//默认 只识别正面
+            if (empty($front)) {
+                return UtilTool::output(505, null, "缺少身份证正面文件地址URL");
+            } else {
+                $param = [
+                    //正面
+                    'fileUrl' => $front,
+                    "type" => 1,
+                ];
+                $frontData = $ocrService->idcard($param);
+                $result = $this->formatData($frontData, [], 0);
+            }
+        }
+
+        return UtilTool::output(200, $result, "请求成功");
     }
 
+
+    /**
+     * 输出数据格式化
+     * @param $front
+     * @param $back
+     * @param $type
+     * @return array
+     */
+    public function formatData($front, $back, $type)
+    {
+        $newresult = [
+            "discern_back" => $type,
+            "front" => [
+                'name' => $front['name'] ?? "--",
+                'sex' => $front['sex'] ?? "--",
+                'nation' => $front['nation'] ?? "--",
+                'birth' => $front['birth'] ?? "--",
+                'address' => $front['address'] ?? "--",
+                'id' => $front['idcard'] ?? "--"
+            ],
+            "back" => [
+                'authority' => $back['issueorg'] ?? '--',
+                'valid_start' => $back['startdate'] ?? '--',
+                'valid_end' => $back['enddate'] ?? '--'
+            ],
+        ];
+
+        return $newresult;
+    }
 }

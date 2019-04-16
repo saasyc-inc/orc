@@ -18,7 +18,7 @@ use Yiche\Ocr\Util\UtilTool;
 class OcrService
 {
     public $config;
-    private $client;
+    public $client;
 
     public function __construct()
     {
@@ -42,6 +42,8 @@ class OcrService
         } elseif ($param['type'] == 2) {//身份证反面
             $idCardSide = "back";
         }
+        $fromIP = !empty($param['from_ip']) ? $param['from_ip'] : $this->getIP();
+        $param['from_ip'] = $fromIP;
         $log['idCardSide'] = $idCardSide;
         //下载文件
         $image = $this->downFile($param['fileUrl']);
@@ -49,7 +51,6 @@ class OcrService
         $options = array();
         $options["detect_direction"] = "true";
         $options["detect_risk"] = "false";
-        $image = base64_decode($image);
         // 带参数调用身份证识别
         try {
             $raw = $this->client->idcard($image, $idCardSide, $options);
@@ -58,6 +59,7 @@ class OcrService
                 //百度身份证识别数据错误
                 $flag = false;
             } else {
+                $flag = true;
                 $ret = $this->formatIDCardData($json);
             }
             $param['response'] = $raw;
@@ -66,10 +68,43 @@ class OcrService
             $param['response'] = $exception->getMessage();
             //throw new \Exception("识别错误");
         }
+        $param['request'] = array_merge($options, ['idCardSide' => $idCardSide]);
         //写入log
         $newLog = array_merge($log, $param, $ret);
         $this->saveLog($newLog, $flag);
         return ($flag == true) ? $ret : false;
+    }
+
+    /**
+     * php获取用户真实 IP
+     * 注意这种方式只适用于浏览器访问时
+     * @return array|false|string *
+     *
+     */
+    public function getIP()
+    {
+        if (isset($_SERVER)) {
+            if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+                $realip = $_SERVER["HTTP_X_FORWARDED_FOR"];
+            } else {
+                if (isset($_SERVER["HTTP_CLIENT_IP"])) {
+                    $realip = $_SERVER["HTTP_CLIENT_IP"];
+                } else {
+                    $realip = !empty($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : '127.0.0.1';
+                }
+            }
+        } else {
+            if (getenv("HTTP_X_FORWARDED_FOR")) {
+                $realip = getenv("HTTP_X_FORWARDED_FOR");
+            } else {
+                if (getenv("HTTP_CLIENT_IP")) {
+                    $realip = getenv("HTTP_CLIENT_IP");
+                } else {
+                    $realip = getenv("REMOTE_ADDR");
+                }
+            }
+        }
+        return $realip;
     }
 
     /**
@@ -125,7 +160,7 @@ class OcrService
     {
         $log = [
             'app_id' => $this->config->APP_ID,
-            'app_key' => $this->config->APP_KEY,
+            'api_key' => $this->config->API_KEY,
             'secret_key' => $this->config->SECRET_KEY ?? "",
             'idcard' => $param['idcard'] ?? "",
             'fileUrl' => $param['fileUrl'] ?? "",
@@ -144,7 +179,6 @@ class OcrService
             'status' => $success == true ? 1 : 2,
             'request' => json_encode($param['request'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'response' => json_encode($param['response'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-            'from_ip' => $param['fromIp'],
             'created_at' => date("Y-m-d H:i:s", time()),
         ];
 
