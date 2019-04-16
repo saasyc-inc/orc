@@ -4,7 +4,8 @@
     "type": "metapackage",
     "require-dev": {
         "php": ">=7.0.0",
-        "laravel/framework": "5.5.*"
+        "laravel/framework": "5.5.*",
+        "phpunit/phpunit": "~6.0"
     },
     "authors": [
         {
@@ -15,8 +16,7 @@
     "minimum-stability": "dev",
     "require": {
         "yiche/config": "^1.0",
-        "baidu/aip-sdk": "dev-master",
-        "phpunit/phpunit": "5.7.10"
+        "baidu/aip-sdk": "dev-master"
     },
     "autoload": {
         "psr-4": {
