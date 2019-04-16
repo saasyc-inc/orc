@@ -1,0 +1,27 @@
+CREATE TABLE `ocr_idcard` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
+  `app_id` varchar(100) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '应用id',
+  `app_key` varchar(100) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '应用key',
+  `secret_key` varchar(100) NOT NULL DEFAULT '' COMMENT '秘钥',
+  `fileUrl` longtext CHARACTER SET utf8 NOT NULL COMMENT '图片base64编码',
+  `status` tinyint(3) NOT NULL DEFAULT '1' COMMENT '状态标识：1 成功 2 失败',
+  `request` text NOT NULL COMMENT '请求数据源',
+  `response` text CHARACTER SET utf8 NOT NULL COMMENT '数据源',
+  `address` varchar(255) NOT NULL DEFAULT '' COMMENT '身份证正面-住址',
+  `birth` varchar(255) NOT NULL DEFAULT '' COMMENT '身份证正面-出生',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT '身份证正面-姓名',
+  `idcard` varchar(255) NOT NULL DEFAULT '' COMMENT '身份证正面-身份证号',
+  `sex` varchar(50) NOT NULL DEFAULT '' COMMENT '身份证正面-性别',
+  `nation` varchar(50) NOT NULL DEFAULT '' COMMENT '身份证正面-民族',
+  `retain` varchar(255) NOT NULL DEFAULT '' COMMENT '保留字段',
+  `issueorg` varchar(50) NOT NULL DEFAULT '' COMMENT '身份证反面-签发机关',
+  `startdate` varchar(50) NOT NULL DEFAULT '' COMMENT '身份证反面-签发日期',
+  `enddate` varchar(50) NOT NULL DEFAULT '' COMMENT '身份证反面-失效日期',
+  `idCardSide` enum('front','back','') NOT NULL DEFAULT '' COMMENT 'front 标识 正面 back 标识身份证反面',
+  `from_ip` varchar(255) NOT NULL DEFAULT '' COMMENT '请求ip',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '文件修改时间',
+  `deleted_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '删除时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='OCR百度身份证识别(eker)';
+
