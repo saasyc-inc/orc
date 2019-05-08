@@ -93,7 +93,7 @@ class OcrController extends Controller
                 'nation' => $front['nation'] ?? "--",
                 'birth' => $front['birth'] ?? "--",
                 'address' => $front['address'] ?? "--",
-                'id' => $front['idcard'] ?? "--"
+                'idcard' => $front['idcard'] ?? "--"
             ],
             "back" => [
                 'authority' => $back['issueorg'] ?? '--',
