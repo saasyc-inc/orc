@@ -85,6 +85,17 @@ class OcrController extends Controller
      */
     public function formatData($front, $back, $type)
     {
+        //识别身份证有效期
+        $endStr = "";
+        if (!empty($back['enddate'])) {
+            if ($back['enddate'] == "长期") {
+                $endStr = "9999-12-30";
+            } else {
+                $endStr = $back['enddate'];
+            }
+        } else {
+            $endStr = "--";
+        }
         $newresult = [
             "discern_back" => $type,
             "front" => [
@@ -98,7 +109,7 @@ class OcrController extends Controller
             "back" => [
                 'authority' => $back['issueorg'] ?? '--',
                 'valid_start' => $back['startdate'] ?? '--',
-                'valid_end' => $back['enddate'] ?? '--'
+                'valid_end' => $endStr
             ],
         ];
 
