@@ -45,8 +45,13 @@ class OcrService
         $fromIP = !empty($param['from_ip']) ? $param['from_ip'] : $this->getIP();
         $param['from_ip'] = $fromIP;
         $log['idCardSide'] = $idCardSide;
+
+        //下载文件,加上压缩参数
+        //$imgUrl = $param['fileUrl'];
+        $imgUrl = $param['fileUrl']."?x-oss-process=image/resize,m_lfit,w_800,h_800";
         //下载文件
-        $image = $this->downFile($param['fileUrl']);
+        $image = $this->downFile($imgUrl);
+
         // 如果有可选参数
         $options = array();
         $options["detect_direction"] = "true";
