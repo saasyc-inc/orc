@@ -15,7 +15,7 @@
     ],
     "require": {
         "yiche/config": "^1.0",
-        "baidu/aip-sdk": "dev-master"
+        "baidu/aip-sdk": "^2.0"
     },
     "autoload": {
         "psr-4": {
