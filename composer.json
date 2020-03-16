@@ -13,7 +13,6 @@
             "email": "eker168@163.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "yiche/config": "^1.0",
         "baidu/aip-sdk": "dev-master"

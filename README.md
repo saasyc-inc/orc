@@ -1,13 +1,5 @@
 # 安装
 - 在项目`composer.json`中添加
-```json
-"repositories": [
-        {
-            "type": "vcs",
-            "url": "https://code.lrwanche.com/yiche/ocr"
-        }
-    ]
-```
 - 执行安装
  
 `composer require yiche/ocr:dev-master`
