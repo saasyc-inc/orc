@@ -15,7 +15,7 @@
     ],
     "minimum-stability": "dev-master",
     "require": {
-        "yiche/config": "^1.0",
+        "yiche/config": "^1.3",
         "baidu/aip-sdk": "dev-master"
     },
     "autoload": {
