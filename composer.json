@@ -3,9 +3,9 @@
     "description": "处理身份证图片OCR识别",
     "type": "library",
     "require-dev": {
-        "php": ">=7.0.0",
-        "laravel/framework": "5.5.*",
-        "phpunit/phpunit": "~6.0"
+        "php": "^7.2",
+        "laravel/framework": "^6.0",
+        "phpunit/phpunit": "^8.0"
     },
     "authors": [
         {
@@ -13,7 +13,7 @@
             "email": "eker168@163.com"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "dev-master",
     "require": {
         "yiche/config": "^1.0",
         "baidu/aip-sdk": "dev-master"
