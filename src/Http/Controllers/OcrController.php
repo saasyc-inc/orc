@@ -11,16 +11,6 @@ use Yiche\Ocr\Util\UtilTool;
 class OcrController extends Controller
 {
 
-    public $config;
-
-    public function __construct()
-    {
-        $this->config = UtilTool::getOcrConfig();
-        if (empty($this->config)) {
-            throw new \Exception("缺少百度OCR配置,请检测!" . PHP_EOL);
-        }
-    }
-
 
     /**
      * 身份证识别
@@ -74,6 +64,21 @@ class OcrController extends Controller
 
         return UtilTool::output(200, $result, "请求成功");
     }
+
+    public function businessLicense(Request $request)
+    {
+        $this->validate($request, [
+            'image_url' => 'required|url',
+        ]);
+        $service = new OcrService();
+        $result = $service->businessLicense($request->input('image_url'));
+        if ($result) {
+            return UtilTool::output(200, $result, '请求成功');
+        } else {
+            return UtilTool::output(400, [], '识别失败');
+        }
+    }
+
 
 
     /**
