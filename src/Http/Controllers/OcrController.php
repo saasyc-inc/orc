@@ -79,6 +79,19 @@ class OcrController extends Controller
         }
     }
 
+    public function vehicleLicense(Request $request)
+    {
+        $this->validate($request, [
+            'image_url' => 'required|url',
+        ]);
+        $service = new OcrService();
+        $result = $service->vehicleLicense($request->input('image_url'));
+        if ($result) {
+            return UtilTool::output(200, $result, '请求成功');
+        } else {
+            return UtilTool::output(400, [], '识别失败');
+        }
+    }
 
 
     /**

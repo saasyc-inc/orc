@@ -84,7 +84,6 @@ class OcrService
         $options = [
             'detect_direction' => $detect_direction,
             'accuracy' => $accuracy,
-            'file_url' => $imageUrl,
         ];
         $imageUrl .= '?x-oss-process=image/resize,m_lfit,w_800,h_800';
         $image = $this->downFile($imageUrl);
@@ -95,7 +94,8 @@ class OcrService
             'app_id' => $this->config->APP_ID,
             'api_key' => $this->config->API_KEY,
             'secret_key' => $this->config->SECRET_KEY ?? "",
-            'from_id' => $this->getIP(),
+            'file_url' => $imageUrl,
+            'from_ip' => $this->getIP(),
             'created_at' => date('Y-m-d'),
         ];
         $ret = [];
@@ -106,6 +106,38 @@ class OcrService
         $log['status'] = $isSuccess ? 1 : 2;
         $log = array_merge($log, $ret);
         DB::table('ocr_business_license')->insert($log);
+        return $isSuccess ? $ret : $isSuccess;
+    }
+
+    public function vehicleLicense($imageUrl, $detect_direction = 'true', $vehicle_license_side = 'front', $unified = 'true')
+    {
+        $isSuccess = false;
+        $options = [
+            'detect_direction' => $detect_direction,
+            'vehicle_license_side' => $vehicle_license_side,
+            'unified' => $unified,
+        ];
+        $imageUrl .= '?x-oss-process=image/resize,m_lfit,w_800,h_800';
+        $image = $this->downFile($imageUrl);
+        $raw = $this->client->vehicleLicense($image, $options);
+        $log = [
+            'request' => json_encode($options, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'response' => json_encode($raw, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'app_id' => $this->config->APP_ID,
+            'api_key' => $this->config->API_KEY,
+            'secret_key' => $this->config->SECRET_KEY ?? "",
+            'from_ip' => $this->getIP(),
+            'file_url' => $imageUrl,
+            'created_at' => date('Y-m-d'),
+        ];
+        $ret = [];
+        if (isset($raw['words_result'])) {
+            $isSuccess = true;
+            $ret = $this->formatVehicleLicenseData($raw);
+        }
+        $log['status'] = $isSuccess ? 1 : 2;
+        $log = array_merge($log, $ret);
+        DB::table('ocr_vehicle_license')->insert($log);
         return $isSuccess ? $ret : $isSuccess;
     }
 
@@ -235,6 +267,23 @@ class OcrService
             'valid_date' => $result['有效期']['words'] ?? '',
             'license_no' => $result['证件编号']['words'] ?? '',
             'social_credit_code' => $result['社会信用代码']['words'] ?? '',
+        ];
+    }
+
+    private function formatVehicleLicenseData(array $raw)
+    {
+        $result = $raw['words_result'];
+        return [
+            'brand' => $result['品牌型号']['words'] ?? '',
+            'license_release_date' => $result['发证日期']['words'] ?? '',
+            'use_type' => $result['使用性质']['words'] ?? '',
+            'engine_no' => $result['发动机号码']['words'] ?? '',
+            'plate_number' => $result['号牌号码']['words'] ?? '',
+            'owner' => $result['所有人']['words'] ?? '',
+            'address' => $result['住址']['words'] ?? '',
+            'register_date' => $result['注册日期']['words'] ?? '',
+            'vin' => $result['车辆识别代号']['words'] ?? '',
+            'car_type' => $result['车辆类型']['words'] ?? '',
         ];
     }
 }
