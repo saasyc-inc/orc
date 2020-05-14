@@ -43,8 +43,36 @@ class OcrInstall extends Command
         $model = new \Yiche\Ocr\Models\OcrIdcard();
         $tableName = $model->getTable();
         if (Schema::hasTable($tableName)) {
-            dd("{$tableName}表已经创建");
+            $this->line("{$tableName}表已经创建");
+        } else {
+            DB::unprepared(file_get_contents($sql));
         }
-        DB::unprepared(file_get_contents($sql));
+
+        $sql2 = dirname(__DIR__) . '/database/sql/ocr_vehicle_license.sql';
+        $model = new \Yiche\Ocr\Models\OcrVehicleLicense();
+        $tableName = $model->getTable();
+        if (Schema::hasTable($tableName)) {
+            $this->line("{$tableName}表已经创建");
+        } else {
+            DB::unprepared(file_get_contents($sql2));
+        }
+
+        $sql3 = dirname(__DIR__) . '/database/sql/ocr_business_license.sql';
+        $model = new \Yiche\Ocr\Models\OcrBusinessLicense();
+        $tableName = $model->getTable();
+        if (Schema::hasTable($tableName)) {
+            $this->line("{$tableName}表已经创建");
+        } else {
+            DB::unprepared(file_get_contents($sql3));
+        }
+
+        $sql4 = dirname(__DIR__) . '/database/sql/ocr_bankcard.sql';
+        $model = new \Yiche\Ocr\Models\OcrBankcard();
+        $tableName = $model->getTable();
+        if (Schema::hasTable($tableName)) {
+            $this->line("{$tableName}表已经创建");
+        } else {
+            DB::unprepared(file_get_contents($sql4));
+        }
     }
 }

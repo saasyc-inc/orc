@@ -2,6 +2,7 @@
 
 namespace Yiche\Ocr\Http\Controllers;
 
+use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,16 +12,7 @@ use Yiche\Ocr\Util\UtilTool;
 class OcrController extends Controller
 {
 
-    public $config;
-
-    public function __construct()
-    {
-        $this->config = UtilTool::getOcrConfig();
-        if (empty($this->config)) {
-            throw new \Exception("缺少百度OCR配置,请检测!" . PHP_EOL);
-        }
-    }
-
+    use ValidatesRequests;
 
     /**
      * 身份证识别
@@ -74,6 +66,50 @@ class OcrController extends Controller
 
         return UtilTool::output(200, $result, "请求成功");
     }
+
+    public function businessLicense(Request $request)
+    {
+        $this->validate($request, [
+            'image_url' => 'required|url',
+        ]);
+        $service = new OcrService();
+        $result = $service->businessLicense($request->input('image_url'));
+        if ($result) {
+            return UtilTool::output(200, $result, '请求成功');
+        } else {
+            return UtilTool::output(400, [], '识别失败');
+        }
+    }
+
+    public function vehicleLicense(Request $request)
+    {
+        $this->validate($request, [
+            'image_url' => 'required|url',
+        ]);
+        $service = new OcrService();
+        $result = $service->vehicleLicense($request->input('image_url'));
+        if ($result) {
+            return UtilTool::output(200, $result, '请求成功');
+        } else {
+            return UtilTool::output(400, [], '识别失败');
+        }
+    }
+
+    public function bankcard(Request $request)
+    {
+        $this->validate($request, [
+            'image_url' => 'required|url',
+        ]);
+        $service = new OcrService();
+        $result = $service->bankcard($request->input('image_url'));
+        if ($result) {
+            return UtilTool::output(200, $result, '请求成功');
+        } else {
+            return UtilTool::output(400, [], '识别失败');
+        }
+    }
+
+
 
 
     /**

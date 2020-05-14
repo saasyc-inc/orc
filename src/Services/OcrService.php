@@ -10,10 +10,8 @@ namespace Yiche\Ocr\Services;
 
 
 use Illuminate\Support\Facades\DB;
-use Monolog\Logger;
-
-
 use Yiche\Ocr\Util\UtilTool;
+
 
 class OcrService
 {
@@ -76,8 +74,101 @@ class OcrService
         $param['request'] = array_merge($options, ['idCardSide' => $idCardSide]);
         //写入log
         $newLog = array_merge($log, $param, $ret);
-        $this->saveLog($newLog, $flag);
+        $this->saveIdcardLog($newLog, $flag);
         return ($flag == true) ? $ret : false;
+    }
+
+    public function businessLicense($imageUrl, $detect_direction = 'true', $accuracy = 'normal')
+    {
+        $isSuccess = false;
+        $options = [
+            'detect_direction' => $detect_direction,
+            'accuracy' => $accuracy,
+        ];
+        $imageUrl .= '?x-oss-process=image/resize,m_lfit,w_800,h_800';
+        $image = $this->downFile($imageUrl);
+        $raw = $this->client->businessLicense($image, $options);
+        $log = [
+            'request' => json_encode($options, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'response' => json_encode($raw, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'app_id' => $this->config->APP_ID,
+            'api_key' => $this->config->API_KEY,
+            'secret_key' => $this->config->SECRET_KEY ?? "",
+            'file_url' => $imageUrl,
+            'from_ip' => $this->getIP(),
+            'created_at' => date('Y-m-d'),
+        ];
+        $ret = [];
+        if (isset($raw['words_result'])) {
+            $isSuccess = true;
+            $ret = $this->formatBusinessLicenseData($raw);
+        }
+        $log['status'] = $isSuccess ? 1 : 2;
+        $log = array_merge($log, $ret);
+        DB::table('ocr_business_license')->insert($log);
+        return $isSuccess ? $ret : $isSuccess;
+    }
+
+    public function vehicleLicense($imageUrl, $detect_direction = 'true', $vehicle_license_side = 'front', $unified = 'true')
+    {
+        $isSuccess = false;
+        $options = [
+            'detect_direction' => $detect_direction,
+            'vehicle_license_side' => $vehicle_license_side,
+            'unified' => $unified,
+        ];
+        $imageUrl .= '?x-oss-process=image/resize,m_lfit,w_800,h_800';
+        $image = $this->downFile($imageUrl);
+        $raw = $this->client->vehicleLicense($image, $options);
+        $log = [
+            'request' => json_encode($options, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'response' => json_encode($raw, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'app_id' => $this->config->APP_ID,
+            'api_key' => $this->config->API_KEY,
+            'secret_key' => $this->config->SECRET_KEY ?? "",
+            'from_ip' => $this->getIP(),
+            'file_url' => $imageUrl,
+            'created_at' => date('Y-m-d'),
+        ];
+        $ret = [];
+        if (isset($raw['words_result'])) {
+            $isSuccess = true;
+            $ret = $this->formatVehicleLicenseData($raw);
+        }
+        $log['status'] = $isSuccess ? 1 : 2;
+        $log = array_merge($log, $ret);
+        DB::table('ocr_vehicle_license')->insert($log);
+        return $isSuccess ? $ret : $isSuccess;
+    }
+
+    public function bankcard($imageUrl, $detect_direction = 'true')
+    {
+        $isSuccess = false;
+        $options = [
+            'detect_direction' => $detect_direction,
+        ];
+        $imageUrl .= '?x-oss-process=image/resize,m_lfit,w_800,h_800';
+        $image = $this->downFile($imageUrl);
+        $raw = $this->client->bankcard($image, $options);
+        $log = [
+            'request' => json_encode($options, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'response' => json_encode($raw, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'app_id' => $this->config->APP_ID,
+            'api_key' => $this->config->API_KEY,
+            'secret_key' => $this->config->SECRET_KEY ?? "",
+            'from_ip' => $this->getIP(),
+            'file_url' => $imageUrl,
+            'created_at' => date('Y-m-d'),
+        ];
+        $ret = [];
+        if (isset($raw['result'])) {
+            $isSuccess = true;
+            $ret = $raw['result'];
+        }
+        $log['status'] = $isSuccess ? 1 : 2;
+        $log = array_merge($log, $ret);
+        DB::table('ocr_bankcard')->insert($log);
+        return $isSuccess ? $ret : $isSuccess;
     }
 
     /**
@@ -86,7 +177,7 @@ class OcrService
      * @return array|false|string *
      *
      */
-    public function getIP()
+    private function getIP()
     {
         if (isset($_SERVER)) {
             if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
@@ -117,7 +208,7 @@ class OcrService
      * @param $fileUrl
      * @return bool|string
      */
-    public function downFile($fileUrl)
+    private function downFile($fileUrl)
     {
         if (trim($fileUrl) == '') {
             return false;
@@ -161,7 +252,7 @@ class OcrService
      * @param bool $success
      * @return bool
      */
-    protected function saveLog($param, $success = true)
+    protected function saveIdcardLog($param, $success = true)
     {
         $log = [
             'app_id' => $this->config->APP_ID,
@@ -172,7 +263,6 @@ class OcrService
             'address' => $param['address'] ?? "",
             'birth' => $param['birth'] ?? "",
             'name' => $param['name'] ?? "",
-            'idcard' => $param['idcard'] ?? "",
             'sex' => $param['sex'] ?? "",
             'nation' => $param['nation'] ?? "",
             'retain' => $param['retain'] ?? "",
@@ -190,5 +280,40 @@ class OcrService
         DB::table('ocr_idcard')->insert($log);
 
         return true;
+    }
+
+    /**
+     * @param $raw
+     * @return array
+     */
+    private function formatBusinessLicenseData($raw)
+    {
+        $result = $raw['words_result'];
+        return [
+            'company_name' => $result['单位名称']['words'] ?? '',
+            'type' => $result['类型']['words'] ?? '',
+            'legal_person' => $result['法人']['words'] ?? '',
+            'address' => $result['地址']['words'] ?? '',
+            'valid_date' => $result['有效期']['words'] ?? '',
+            'license_no' => $result['证件编号']['words'] ?? '',
+            'social_credit_code' => $result['社会信用代码']['words'] ?? '',
+        ];
+    }
+
+    private function formatVehicleLicenseData(array $raw)
+    {
+        $result = $raw['words_result'];
+        return [
+            'brand' => $result['品牌型号']['words'] ?? '',
+            'license_release_date' => $result['发证日期']['words'] ?? '',
+            'use_type' => $result['使用性质']['words'] ?? '',
+            'engine_no' => $result['发动机号码']['words'] ?? '',
+            'plate_number' => $result['号牌号码']['words'] ?? '',
+            'owner' => $result['所有人']['words'] ?? '',
+            'address' => $result['住址']['words'] ?? '',
+            'register_date' => $result['注册日期']['words'] ?? '',
+            'vin' => $result['车辆识别代号']['words'] ?? '',
+            'car_type' => $result['车辆类型']['words'] ?? '',
+        ];
     }
 }
