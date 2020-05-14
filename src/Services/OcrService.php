@@ -131,7 +131,7 @@ class OcrService
             'created_at' => date('Y-m-d'),
         ];
         $ret = [];
-        if (isset($raw['data']['words_result'])) {
+        if (isset($raw['words_result'])) {
             $isSuccess = true;
             $ret = $this->formatVehicleLicenseData($raw);
         }
@@ -302,7 +302,7 @@ class OcrService
 
     private function formatVehicleLicenseData(array $raw)
     {
-        $result = $raw['data']['words_result'];
+        $result = $raw['words_result'];
         return [
             'brand' => $result['品牌型号']['words'] ?? '',
             'license_release_date' => $result['发证日期']['words'] ?? '',

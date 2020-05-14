@@ -2,7 +2,7 @@ CREATE TABLE `ocr_bankcard`
 (
     `id`               bigint(20) unsigned                     NOT NULL AUTO_INCREMENT COMMENT '自增 ID',
     `app_id`           varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '应用ID',
-    `app_key`          varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '应用KEY',
+    `api_key`          varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '应用KEY',
     `secret_key`       varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '秘钥',
     `file_url`         varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '文件URL',
     `request`          text COLLATE utf8mb4_unicode_ci COMMENT '请求数据',

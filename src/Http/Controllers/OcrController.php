@@ -2,6 +2,7 @@
 
 namespace Yiche\Ocr\Http\Controllers;
 
+use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,7 @@ use Yiche\Ocr\Util\UtilTool;
 class OcrController extends Controller
 {
 
+    use ValidatesRequests;
 
     /**
      * 身份证识别
