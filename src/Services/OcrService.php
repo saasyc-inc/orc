@@ -131,13 +131,43 @@ class OcrService
             'created_at' => date('Y-m-d'),
         ];
         $ret = [];
-        if (isset($raw['words_result'])) {
+        if (isset($raw['data']['words_result'])) {
             $isSuccess = true;
             $ret = $this->formatVehicleLicenseData($raw);
         }
         $log['status'] = $isSuccess ? 1 : 2;
         $log = array_merge($log, $ret);
         DB::table('ocr_vehicle_license')->insert($log);
+        return $isSuccess ? $ret : $isSuccess;
+    }
+
+    public function bankcard($imageUrl, $detect_direction = 'true')
+    {
+        $isSuccess = false;
+        $options = [
+            'detect_direction' => $detect_direction,
+        ];
+        $imageUrl .= '?x-oss-process=image/resize,m_lfit,w_800,h_800';
+        $image = $this->downFile($imageUrl);
+        $raw = $this->client->bankcard($image, $options);
+        $log = [
+            'request' => json_encode($options, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'response' => json_encode($raw, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+            'app_id' => $this->config->APP_ID,
+            'api_key' => $this->config->API_KEY,
+            'secret_key' => $this->config->SECRET_KEY ?? "",
+            'from_ip' => $this->getIP(),
+            'file_url' => $imageUrl,
+            'created_at' => date('Y-m-d'),
+        ];
+        $ret = [];
+        if (isset($raw['result'])) {
+            $isSuccess = true;
+            $ret = $raw['result'];
+        }
+        $log['status'] = $isSuccess ? 1 : 2;
+        $log = array_merge($log, $ret);
+        DB::table('ocr_bankcard')->insert($log);
         return $isSuccess ? $ret : $isSuccess;
     }
 
@@ -272,7 +302,7 @@ class OcrService
 
     private function formatVehicleLicenseData(array $raw)
     {
-        $result = $raw['words_result'];
+        $result = $raw['data']['words_result'];
         return [
             'brand' => $result['品牌型号']['words'] ?? '',
             'license_release_date' => $result['发证日期']['words'] ?? '',
